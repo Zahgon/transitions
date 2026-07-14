@@ -1,11 +1,3 @@
-"""
-    transitions.extensions.factory
-    ------------------------------
-
-    This module contains the definitions of classes which combine the functionality of transitions'
-    extension modules. These classes can be accessed by names as well as through a static convenience
-    factory object.
-"""
 
 from functools import partial
 import itertools
@@ -22,42 +14,26 @@ try:
     from transitions.extensions.asyncio import HierarchicalAsyncMachine, NestedAsyncTransition
 except (ImportError, SyntaxError):  # pragma: no cover
     class AsyncMachine(Machine):  # type: ignore
-        """A mock of AsyncMachine for Python 3.6 and earlier."""
+        pass
 
     class AsyncTransition(Transition):  # type: ignore
-        """A mock of AsyncTransition for Python 3.6 and earlier."""
+        pass
 
     class HierarchicalAsyncMachine(HierarchicalMachine):  # type: ignore
-        """A mock of HierarchicalAsyncMachine for Python 3.6 and earlier."""
+        pass
 
     class NestedAsyncTransition(NestedTransition):  # type: ignore
-        """A mock of NestedAsyncTransition for Python 3.6 and earlier."""
+        pass
 
 
 class MachineFactory(object):
-    """Convenience factory for machine class retrieval."""
 
-    # get one of the predefined classes which fulfill the criteria
     @staticmethod
     def get_predefined(graph=False, nested=False, locked=False, asyncio=False):
-        """A function to retrieve machine classes by required functionality.
-        Args:
-            graph (bool): Whether the returned class should contain graph support.
-            nested: Whether the returned machine class should support nested states.
-            locked: Whether the returned class should facilitate locks for threadsafety.
-
-        Returns (class): A machine class with the specified features.
-        """
-        try:
-            return _CLASS_MAP[(graph, nested, locked, asyncio)]
-        except KeyError:
-            raise ValueError("Feature combination not (yet) supported")  # from KeyError
+        pass
 
 
 class LockedHierarchicalMachine(LockedMachine, HierarchicalMachine):
-    """
-        A threadsafe hierarchical machine.
-    """
 
     event_cls = NestedEvent
 
@@ -66,9 +42,6 @@ class LockedHierarchicalMachine(LockedMachine, HierarchicalMachine):
 
 
 class LockedGraphMachine(GraphMachine, LockedMachine):
-    """
-        A threadsafe machine with graph support.
-    """
 
     @staticmethod
     def format_references(func):
@@ -83,9 +56,6 @@ class LockedGraphMachine(GraphMachine, LockedMachine):
 
 
 class LockedHierarchicalGraphMachine(GraphMachine, LockedHierarchicalMachine):
-    """
-        A threadsafe hierarchical machine with graph support.
-    """
 
     transition_cls = NestedGraphTransition
     event_cls = NestedEvent
@@ -96,18 +66,15 @@ class LockedHierarchicalGraphMachine(GraphMachine, LockedHierarchicalMachine):
 
 
 class AsyncGraphMachine(GraphMachine, AsyncMachine):
-    """A machine that supports asynchronous event/callback processing with Graphviz support."""
 
     transition_cls = AsyncTransition
 
 
 class HierarchicalAsyncGraphMachine(GraphMachine, HierarchicalAsyncMachine):
-    """A hierarchical machine that supports asynchronous event/callback processing with Graphviz support."""
 
     transition_cls = NestedAsyncTransition
 
 
-# 4d tuple (graph, nested, locked, async)
 _CLASS_MAP = {
     (False, False, False, False): Machine,
     (False, False, True, False): LockedMachine,

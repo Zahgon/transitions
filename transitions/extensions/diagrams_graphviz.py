@@ -1,10 +1,3 @@
-"""
-    transitions.extensions.diagrams
-    -------------------------------
-
-    Graphviz support for (nested) machines. This also includes partial views
-    of currently valid transitions.
-"""
 import copy
 import logging
 from functools import partial
@@ -23,10 +16,6 @@ _LOGGER.addHandler(logging.NullHandler())
 
 
 class Graph(BaseGraph):
-    """Graph creation for transitions.core.Machine.
-        Attributes:
-            custom_styles (dict): A dictionary of styles for the current graph
-    """
 
     def __init__(self, machine):
         self.custom_styles = {}
@@ -34,17 +23,13 @@ class Graph(BaseGraph):
         super(Graph, self).__init__(machine)
 
     def set_previous_transition(self, src, dst):
-        self.custom_styles["edge"][src][dst] = "previous"
-        self.set_node_style(src, "previous")
+        pass
 
     def set_node_style(self, state, style):
-        self.custom_styles["node"][state.name if hasattr(state, "name") else state] = style
+        pass
 
     def reset_styling(self):
-        self.custom_styles = {
-            "edge": defaultdict(lambda: defaultdict(str)),
-            "node": defaultdict(str),
-        }
+        pass
 
     def _add_nodes(self, states, container):
         for state in states:
@@ -74,12 +59,7 @@ class Graph(BaseGraph):
                 )
 
     def generate(self):
-        """Triggers the generation of a graph. With graphviz backend, this does nothing since graph trees need to be
-        build from scratch with the configured styles.
-        """
-        if not pgv:  # pragma: no cover
-            raise Exception("AGraph diagram requires graphviz")
-        # we cannot really generate a graph in advance with graphviz
+        pass
 
     def get_graph(self, title=None, roi_state=None):
         title = title if title else self.machine.title
@@ -92,7 +72,6 @@ class Graph(BaseGraph):
         )
         fsm_graph.graph_attr.update(**self.machine.machine_attributes)
         fsm_graph.graph_attr["label"] = title
-        # For each state, draw a circle
         states, transitions = self._get_elements()
         if roi_state:
             active_states = set()
@@ -121,55 +100,21 @@ class Graph(BaseGraph):
         setattr(fsm_graph, "draw", partial(self.draw, fsm_graph))
         return fsm_graph
 
-    # pylint: disable=redefined-builtin,unused-argument
     def draw(self, graph, filename, format=None, prog="dot", args=""):
-        """
-        Generates and saves an image of the state machine using graphviz. Note that `prog` and `args` are only part
-        of the signature to mimic `Agraph.draw` and thus allow to easily switch between graph backends.
-        Args:
-            filename (str or file descriptor or stream or None): path and name of image output, file descriptor,
-            stream object or None
-            format (str): Optional format of the output file
-            prog (str): ignored
-            args (str): ignored
-        Returns:
-            None or str: Returns a binary string of the graph when the first parameter (`filename`) is set to None.
-        """
-        graph.engine = prog
-        if filename is None:
-            if format is None:
-                raise ValueError(
-                    "Parameter 'format' must not be None when filename is no valid file path."
-                )
-            return graph.pipe(format)
-        try:
-            filename, ext = splitext(filename)
-            format = format if format is not None else ext[1:]
-            graph.render(filename, format=format if format else "png", cleanup=True)
-        except (TypeError, AttributeError):
-            if format is None:
-                raise ValueError(
-                    "Parameter 'format' must not be None when filename is no valid file path."
-                )  # from None
-            filename.write(graph.pipe(format))
-        return None
+        pass
 
 
 class NestedGraph(Graph):
-    """Graph creation support for transitions.extensions.nested.HierarchicalGraphMachine."""
 
     def __init__(self, *args, **kwargs):
         self._cluster_states = []
         super(NestedGraph, self).__init__(*args, **kwargs)
 
     def set_node_style(self, state, style):
-        for state_name in self._get_state_names(state):
-            super(NestedGraph, self).set_node_style(state_name, style)
+        pass
 
     def set_previous_transition(self, src, dst):
-        src_name = self._get_global_name(src.split(self.machine.state_cls.separator))
-        dst_name = self._get_global_name(dst.split(self.machine.state_cls.separator))
-        super(NestedGraph, self).set_previous_transition(src_name, dst_name)
+        pass
 
     def _add_nodes(self, states, container):
         self._add_nested_nodes(states, container, prefix="", default_style="default")
@@ -218,7 +163,6 @@ class NestedGraph(Graph):
         edges_attr = defaultdict(lambda: defaultdict(dict))
 
         for transition in transitions:
-            # enable customizable labels
             src = transition["source"]
             try:
                 dst = transition["dest"]
@@ -262,7 +206,6 @@ class NestedGraph(Graph):
                 label_pos = "taillabel" if label_pos.startswith("l") else "label"
         dst_name = dst
 
-        # remove ltail when dst (ltail always starts with 'cluster_') is a child of src
         if "ltail" in attr and dst_name.startswith(attr["ltail"][8:]):
             del attr["ltail"]
 

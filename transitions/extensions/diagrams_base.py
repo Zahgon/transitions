@@ -1,9 +1,3 @@
-"""
-    transitions.extensions.diagrams_base
-    ------------------------------------
-
-    The class BaseGraph implements the common ground for Graphviz backends.
-"""
 
 import copy
 import abc
@@ -16,12 +10,6 @@ _LOGGER.addHandler(logging.NullHandler())
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseGraph(object):
-    """Provides the common foundation for graphs generated either with pygraphviz or graphviz. This abstract class
-    should not be instantiated directly. Use .(py)graphviz.(Nested)Graph instead.
-    Attributes:
-        machine (GraphMachine): The associated GraphMachine
-        fsm_graph (object): The AGraph-like object that holds the graphviz information
-    """
 
     def __init__(self, machine):
         self.machine = machine
@@ -73,17 +61,10 @@ class BaseGraph(object):
                 label += r"\l- exit:\l  + " + r"\l  + ".join(state["on_exit"])
             if "timeout" in state:
                 label += r'\l- timeout(' + state['timeout'] + 's) -> (' + ', '.join(state['on_timeout']) + ')'
-        # end each label with a left-aligned newline
         return label + r"\l"
 
     def _get_state_names(self, state):
-        if isinstance(state, (list, tuple, set)):
-            for res in state:
-                for inner in self._get_state_names(res):
-                    yield inner
-        else:
-            yield self.machine.state_cls.separator.join(self.machine._get_enum_path(state))\
-                if hasattr(state, "name") else state
+        pass
 
     def _transition_label(self, tran):
         edge_label = tran.get("label", tran["trigger"])
@@ -99,12 +80,7 @@ class BaseGraph(object):
         return edge_label
 
     def _get_global_name(self, path):
-        if path:
-            state = path.pop(0)
-            with self.machine(state):
-                return self._get_global_name(path)
-        else:
-            return self.machine.get_global_name()
+        pass
 
     def _flatten(self, *lists):
         return (e for a in lists for e in

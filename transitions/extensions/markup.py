@@ -1,11 +1,3 @@
-"""
-    transitions.extensions.markup
-    -----------------------------
-
-    This module extends machines with markup functionality that can be used to retrieve the current machine
-    configuration as a dictionary. This is used as the foundation for diagram generation with Graphviz but can
-    also be used to store and transfer machines.
-"""
 
 from functools import partial
 import importlib
@@ -15,27 +7,20 @@ import numbers
 from six import string_types, iteritems
 
 try:
-    # Enums are supported for Python 3.4+ and Python 2.7 with enum34 package installed
     from enum import Enum, EnumMeta
 except ImportError:  # pragma: no cover
-    # If enum is not available, create dummy classes for type checks
-    # typing must be prevented redefinition issues with mypy
     class Enum:  # type:ignore
-        """This is just an Enum stub for Python 2 and Python 3.3 and before without Enum support."""
+        pass
 
     class EnumMeta:  # type:ignore
-        """This is just an EnumMeta stub for Python 2 and Python 3.3 and before without Enum support."""
+        pass
 
 from ..core import Machine
 from .nesting import HierarchicalMachine
 
 
 class MarkupMachine(Machine):
-    """Extends transitions.core.Machine with the capability to generate a dictionary representation of itself,
-    its events, states and models.
-    """
 
-    # Special attributes such as NestedState._name/_parent or Transition._condition are handled differently
     state_attributes = ['on_exit', 'on_enter', 'ignore_invalid_triggers', 'timeout', 'on_timeout', 'tags', 'label',
                         'final']
     transition_attributes = ['source', 'dest', 'prepare', 'before', 'after', 'label']
@@ -52,7 +37,6 @@ class MarkupMachine(Machine):
         self._needs_update = True
 
         if self._markup:
-            # remove models from config to process them AFTER the base machine has been initialized
             models = self._markup.pop('models', [])
             super(MarkupMachine, self).__init__(model=None, **self._markup)
             for mod in models:
@@ -82,26 +66,16 @@ class MarkupMachine(Machine):
 
     @property
     def auto_transitions_markup(self):
-        """Whether auto transitions should be included in the markup."""
-        return self._auto_transitions_markup
+        pass
 
     @auto_transitions_markup.setter
     def auto_transitions_markup(self, value):
-        """Whether auto transitions should be included in the markup."""
-        self._auto_transitions_markup = value
-        self._needs_update = True
+        pass
 
     @property
     def markup(self):
-        """Returns the machine's configuration as a markup dictionary.
-        Returns:
-            dict of machine configuration parameters.
-        """
-        self._markup['models'] = self._convert_models()
-        return self.get_markup_config()
+        pass
 
-    # the only reason why this not part of markup property is that pickle
-    # has issues with properties during __setattr__ (self.markup is not set)
     def get_markup_config(self):
         """Generates and returns all machine markup parameters except models.
         Returns:
@@ -119,13 +93,10 @@ class MarkupMachine(Machine):
         self._needs_update = True
 
     def remove_transition(self, trigger, source="*", dest="*"):
-        super(MarkupMachine, self).remove_transition(trigger, source, dest)
-        self._needs_update = True
+        pass
 
     def add_states(self, states, on_enter=None, on_exit=None, ignore_invalid_triggers=None, **kwargs):
-        super(MarkupMachine, self).add_states(states, on_enter=on_enter, on_exit=on_exit,
-                                              ignore_invalid_triggers=ignore_invalid_triggers, **kwargs)
-        self._needs_update = True
+        pass
 
     @staticmethod
     def format_references(func):
@@ -190,29 +161,14 @@ class MarkupMachine(Machine):
                     root['transitions'].append(t_def)
 
     def _add_markup_model(self, markup):
-        initial = markup.get('state', None)
-        if markup['class-name'] == 'self':
-            self.add_model(self, initial)
-        else:
-            mod_name, cls_name = markup['class-name'].rsplit('.', 1)
-            cls = getattr(importlib.import_module(mod_name), cls_name)
-            self.add_model(cls(), initial)
+        pass
 
     def _convert_models(self):
-        models = []
-        for model in self.models:
-            state = getattr(model, self.model_attribute)
-            model_def = dict(state=state.name if isinstance(state, Enum) else state)
-            model_def['name'] = model.name if hasattr(model, 'name') else str(id(model))
-            model_def['class-name'] = 'self' if model == self else model.__module__ + "." + model.__class__.__name__
-            models.append(model_def)
-        return models
+        pass
 
     def _omit_auto_transitions(self, event):
         return self.auto_transitions_markup is False and self._is_auto_transition(event)
 
-    # auto transition events commonly a) start with the 'to_' prefix, followed by b) the state name
-    # and c) contain a transition from each state to the target state (including the target)
     def _is_auto_transition(self, event):
         if event.name.startswith('to_') and len(event.transitions) == len(self.states):
             state_name = event.name[len('to_'):]
@@ -224,14 +180,11 @@ class MarkupMachine(Machine):
         return False
 
     def _identify_callback(self, name):
-        callback_type, target = super(MarkupMachine, self)._identify_callback(name)
-        if callback_type:
-            self._needs_update = True
-        return callback_type, target
+        pass
 
 
 class HierarchicalMarkupMachine(MarkupMachine, HierarchicalMachine):
-    """Extends transitions.extensions.nesting.HierarchicalMachine with markup capabilities."""
+    pass
 
 
 def rep(func, format_references=None):

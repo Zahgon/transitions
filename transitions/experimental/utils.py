@@ -110,18 +110,7 @@ def with_model_definitions(cls):
     add_model = getattr(cls, "add_model")
 
     def add_model_override(self, model, initial=None):
-        self.model_override = True
-        for model in listify(model):
-            model = self if model == "self" else model
-            for name, specs in TriggerPlaceholder.definitions.get(model.__class__, {}).items():
-                for spec in specs:
-                    if isinstance(spec, list):
-                        self.add_transition(name, *spec)
-                    elif isinstance(spec, dict):
-                        self.add_transition(name, **spec)
-                    else:
-                        raise ValueError("Cannot add {} for event {} to machine", spec, name)
-        add_model(self, model, initial)
+        pass
 
     setattr(cls, 'add_model', add_model_override)
     return cls
@@ -147,12 +136,7 @@ def event(*configs):
 
 def add_transitions(*configs):
     def _outer(trigger_func):
-        if isinstance(trigger_func, TriggerPlaceholder):
-            for config in reversed(configs):
-                trigger_func.configs.appendleft(config)
-        else:
-            trigger_func = TriggerPlaceholder(configs)
-        return trigger_func
+        pass
 
     return _outer
 

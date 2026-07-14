@@ -1,10 +1,3 @@
-"""
-    transitions.extensions.diagrams
-    -------------------------------
-
-    Mermaid support for (nested) machines. This also includes partial views
-    of currently valid transitions.
-"""
 import copy
 import logging
 from collections import defaultdict
@@ -17,10 +10,6 @@ _LOGGER.addHandler(logging.NullHandler())
 
 
 class Graph(BaseGraph):
-    """Graph creation for transitions.core.Machine.
-        Attributes:
-            custom_styles (dict): A dictionary of styles for the current graph
-    """
 
     def __init__(self, machine):
         self.custom_styles = {}
@@ -28,17 +17,13 @@ class Graph(BaseGraph):
         super(Graph, self).__init__(machine)
 
     def set_previous_transition(self, src, dst):
-        self.custom_styles["edge"][src][dst] = "previous"
-        self.set_node_style(src, "previous")
+        pass
 
     def set_node_style(self, state, style):
-        self.custom_styles["node"][state.name if hasattr(state, "name") else state] = style
+        pass
 
     def reset_styling(self):
-        self.custom_styles = {
-            "edge": defaultdict(lambda: defaultdict(str)),
-            "node": defaultdict(str),
-        }
+        pass
 
     def _add_nodes(self, states, container):
         for state in states:
@@ -62,7 +47,6 @@ class Graph(BaseGraph):
         """Triggers the generation of a graph. With graphviz backend, this does nothing since graph trees need to be
         built from scratch with the configured styles.
         """
-        # we cannot really generate a graph in advance with graphviz
 
     def get_graph(self, title=None, roi_state=None):
         title = title if title else self.machine.title
@@ -128,24 +112,20 @@ class Graph(BaseGraph):
                 label += r"\n- exit:\n  + " + r"\n  + ".join(state["on_exit"])
             if "timeout" in state:
                 label += r'\n- timeout(' + state['timeout'] + 's) -> (' + ', '.join(state['on_timeout']) + ')'
-        # end each label with a left-aligned newline
         return label
 
 
 class NestedGraph(Graph):
-    """Graph creation support for transitions.extensions.nested.HierarchicalGraphMachine."""
 
     def __init__(self, *args, **kwargs):
         self._cluster_states = []
         super(NestedGraph, self).__init__(*args, **kwargs)
 
     def set_node_style(self, state, style):
-        for state_name in self._get_state_names(state):
-            super(NestedGraph, self).set_node_style(state_name, style)
+        pass
 
     def set_previous_transition(self, src, dst):
-        self.custom_styles["edge"][src][dst] = "previous"
-        self.set_node_style(src, "previous")
+        pass
 
     def _add_nodes(self, states, container):
         self._add_nested_nodes(states, container, prefix="", default_style="default")
@@ -162,7 +142,6 @@ class NestedGraph(Graph):
             if state.get("children", None) is not None:
                 container.append("state {} {{".format(name))
                 self._cluster_states.append(name)
-                # with container.subgraph(name=cluster_name, graph_attr=attr) as sub:
                 initial = state.get("initial", "")
                 is_parallel = isinstance(initial, list)
                 if is_parallel:
@@ -192,7 +171,6 @@ class NestedGraph(Graph):
         edges_attr = defaultdict(lambda: defaultdict(dict))
 
         for transition in transitions:
-            # enable customizable labels
             src = transition["source"]
             dst = transition.get("dest", src)
             if edges_attr[src][dst]:
@@ -227,29 +205,8 @@ class DigraphMock:
     def __init__(self, source):
         self.source = source
 
-    # pylint: disable=redefined-builtin,unused-argument
     def draw(self, filename, format=None, prog="dot", args=""):
-        """
-        Generates and saves an image of the state machine using graphviz. Note that `prog` and `args` are only part
-        of the signature to mimic `Agraph.draw` and thus allow to easily switch between graph backends.
-        Args:
-            filename (str or file descriptor or stream or None): path and name of image output, file descriptor,
-            stream object or None
-            format (str): ignored
-            prog (str): ignored
-            args (str): ignored
-        Returns:
-            None or str: Returns a binary string of the graph when the first parameter (`filename`) is set to None.
-        """
-
-        if filename is None:
-            return self.source
-        if isinstance(filename, str):
-            with open(filename, "w") as f:
-                f.write(self.source)
-        else:
-            filename.write(self.source.encode())
-        return None
+        pass
 
 
 invalid = {"style", "shape", "peripheries", "strict", "directed"}
